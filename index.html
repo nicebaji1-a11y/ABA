@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#087c59">
+<title>ABA Pay</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f2f6f4;color:#17231f;font-family:Arial,sans-serif}
+header{background:#087c59;color:white;padding:24px 20px;border-radius:0 0 24px 24px}
+header h1{margin:0;font-size:28px}
+header p{font-size:13px}
+.balance{font-size:32px;font-weight:bold;margin:14px 0}
+main{padding:16px;max-width:480px;margin:auto}
+h2{font-size:18px}
+.services{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{font:inherit;cursor:pointer}
+.service{border:0;background:white;padding:18px 12px;border-radius:15px;text-align:left;box-shadow:0 2px 8px #0000000b}
+.service span{font-size:25px;display:block;margin-bottom:10px}
+.service strong{display:block}
+.service small{display:block;color:#758078;margin-top:6px}
+.panel{display:none;background:white;padding:18px;border-radius:15px;margin-top:16px}
+.panel.active{display:block}
+label{display:block;font-size:13px;margin:12px 0 6px}
+input,select{width:100%;padding:12px;border:1px solid #d8e2dc;border-radius:9px}
+.primary{background:#087c59;color:white;border:0;border-radius:9px;padding:13px;width:100%;margin-top:16px}
+.back{background:#e5f3ed;color:#07563f;border:0;padding:9px 12px;border-radius:8px}
+.notice{font-size:12px;background:#fff4d8;color:#755319;padding:12px;border-radius:9px;margin-top:16px;line-height:1.6}
+.tx{display:flex;justify-content:space-between;gap:10px;background:white;padding:14px;border-radius:10px;margin:9px 0;font-size:13px}
+.tx small{display:block;color:#758078;margin-top:5px}
+nav{position:fixed;bottom:0;left:0;width:100%;display:flex;justify-content:space-around;background:white;border-top:1px solid #ddd;padding:12px 0}
+nav button{border:0;background:none;color:#087c59;font-size:12px}
+.app{padding-bottom:65px}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<h1>ABA Pay</h1>
+<p>আপনার ডিজিটাল ওয়ালেট</p>
+<p>প্রোটোটাইপ ব্যালেন্স</p>
+<div class="balance" id="balance">৳ ৫,০০০</div>
+<small>নমুনা অর্থ — বাস্তব টাকা নয়</small>
+</header>
+<main>
+<section id="home">
+<h2>আপনার সেবা</h2>
+<div class="services">
+<button class="service" onclick="openPanel('send')"><span>📤</span><strong>Send Money</strong><small>টাকা পাঠান</small></button>
+<button class="service" onclick="openPanel('cashin')"><span>💰</span><strong>Cash In</strong><small>নমুনা জমা</small></button>
+<button class="service" onclick="openPanel('cashout')"><span>🏧</span><strong>Cash Out</strong><small>নমুনা উত্তোলন</small></button>
+<button class="service" onclick="openPanel('recharge')"><span>📱</span><strong>Mobile Recharge</strong><small>নমুনা রিচার্জ</small></button>
+</div>
+<div class="notice">এটি একটি পরীক্ষামূলক প্রোটোটাইপ। এখানে কোনো বাস্তব টাকা পাঠানো, উত্তোলন বা মোবাইল রিচার্জ হয় না।</div>
+</section>
+
+<section id="send" class="panel">
+<button class="back" onclick="goHome()">← ফিরে যান</button><h2>Send Money</h2>
+<form onsubmit="return transact(event,'send')">
+<label>প্রাপকের নম্বর</label><input id="sendPhone" placeholder="01XXXXXXXXX" pattern="01[0-9]{9}" maxlength="11" required>
+<label>পরিমাণ (৳)</label><input id="sendAmount" type="number" min="1" step="1" required>
+<button class="primary">নমুনা টাকা পাঠান</button>
+</form>
+</section>
+
+<section id="cashin" class="panel">
+<button class="back" onclick="goHome()">← ফিরে যান</button><h2>Cash In</h2>
+<form onsubmit="return transact(event,'cashin')">
+<label>পরিমাণ (৳)</label><input id="cashinAmount" type="number" min="1" step="1" required>
+<button class="primary">নমুনা ব্যালেন্স যোগ করুন</button>
+</form>
+</section>
+
+<section id="cashout" class="panel">
+<button class="back" onclick="goHome()">← ফিরে যান</button><h2>Cash Out</h2>
+<form onsubmit="return transact(event,'cashout')">
+<label>এজেন্ট নম্বর</label><input id="agentPhone" placeholder="01XXXXXXXXX" pattern="01[0-9]{9}" maxlength="11" required>
+<label>পরিমাণ (৳)</label><input id="cashoutAmount" type="number" min="1" step="1" required>
+<button class="primary">নমুনা উত্তোলন</button>
+</form>
+</section>
+
+<section id="recharge" class="panel">
+<button class="back" onclick="goHome()">← ফিরে যান</button><h2>Mobile Recharge</h2>
+<form onsubmit="return transact(event,'recharge')">
+<label>অপারেটর</label><select id="operator"><option>Grameenphone</option><option>Robi</option><option>Banglalink</option><option>Teletalk</option></select>
+<label>মোবাইল নম্বর</label><input id="rechargePhone" placeholder="01XXXXXXXXX" pattern="01[0-9]{9}" maxlength="11" required>
+<label>পরিমাণ (৳)</label><input id="rechargeAmount" type="number" min="20" step="1" required>
+<button class="primary">নমুনা রিচার্জ</button>
+</form>
+</section>
+
+<section id="history" style="display:none">
+<h2>Transaction History</h2><div id="transactions"></div>
+</section>
+
+<section id="profile" style="display:none">
+<h2>প্রোফাইল</h2><div class="tx">ABA Pay ব্যবহারকারী</div>
+<div class="notice">এটি একটি স্থানীয় প্রোটোটাইপ অ্যাকাউন্ট। বাস্তব অ্যাকাউন্ট সংযুক্ত নেই।</div>
+</section>
+</main>
+<nav>
+<button onclick="showTab('home')">⌂<br>হোম</button>
+<button onclick="showTab('history')">↔<br>লেনদেন</button>
+<button onclick="showTab('profile')">◉<br>প্রোফাইল</button>
+</nav>
+</div>
+<script>
+const KEY='aba_prototype_v1';
+let state;
+try{state=JSON.parse(localStorage.getItem(KEY))||{balance:5000,transactions:[]};if(!Number.isFinite(state.balance)||!Array.isArray(state.transactions))throw Error()}catch(e){state={balance:5000,transactions:[]}}
+const labels={send:'Send Money',cashin:'Cash In',cashout:'Cash Out',recharge:'Mobile Recharge'};
+function money(n){return '৳ '+new Intl.NumberFormat('bn-BD',{maximumFractionDigits:0}).format(n)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){alert('ডেটা সেভ করা যায়নি')}}
+function render(){
+document.getElementById('balance').textContent=money(state.balance);
+document.getElementById('transactions').innerHTML=state.transactions.length?state.transactions.map(t=>'<div class="tx"><div>'+labels[t.type]+'<small>'+t.detail+' · '+t.date+'</small></div><strong>'+(t.type==='cashin'?'+ ':'− ')+money(t.amount)+'</strong></div>').join(''):'<p>এখনো কোনো লেনদেন নেই।</p>';
+}
+function showTab(id){
+document.querySelectorAll('main>section').forEach(s=>s.style.display='none');
+document.querySelectorAll('.panel').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).style.display='block';render();
+}
+function openPanel(id){showTab('home');document.getElementById('home').style.display='none';document.getElementById(id).classList.add('active')}
+function goHome(){document.querySelectorAll('.panel').forEach(s=>s.classList.remove('active'));document.getElementById('home').style.display='block'}
+function transact(e,type){
+e.preventDefault();
+const ids={send:'sendAmount',cashin:'cashinAmount',cashout:'cashoutAmount',recharge:'rechargeAmount'};
+const amount=Number(document.getElementById(ids[type]).value);
+if(!Number.isSafeInteger(amount)||amount<=0||amount>100000){alert('সঠিক পরিমাণ লিখুন');return false}
+if(type!=='cashin'&&amount>state.balance){alert('নমুনা ব্যালেন্স যথেষ্ট নয়');return false}
+if(type==='cashin')state.balance+=amount;else state.balance-=amount;
+let detail='নমুনা লেনদেন';
+if(type==='send')detail='প্রাপক: '+document.getElementById('sendPhone').value;
+if(type==='cashout')detail='এজেন্ট: '+document.getElementById('agentPhone').value;
+if(type==='recharge')detail=document.getElementById('operator').value+' · '+document.getElementById('rechargePhone').value;
+state.transactions.unshift({type,amount,detail,date:new Date().toLocaleString('bn-BD')});
+state.transactions=state.transactions.slice(0,100);save();render();e.target.reset();goHome();
+alert('নমুনা লেনদেন সম্পন্ন। কোনো বাস্তব টাকা স্থানান্তর হয়নি।');return false
+}
+render();
+</script>
+</body>
+</html>
